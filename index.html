@@ -11,6 +11,26 @@
   <link rel=apple-touch-icon href=icons/icon-192.png>
   <meta name=apple-mobile-web-app-capable content=yes>
   <link rel="stylesheet" href="styles.css">
+  <!-- Firebase App (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <!-- Firebase Realtime Database (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    // Konfigurasi Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeC2wlPafry-qaaPF0xvjOtoT7UhYarGg",
+      authDomain: "forumchatportal.firebaseapp.com",
+      projectId: "forumchatportal",
+      storageBucket: "forumchatportal.appspot.com",
+      messagingSenderId: "827734259506",
+      appId: "1:827734259506:web:5e8a59ff4cc28f32a3892b",
+      measurementId: "G-V7SR8JG4TW",
+      databaseURL: "https://forumchatportal-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+    // Inisialisasi Firebase
+    firebase.initializeApp(firebaseConfig);
+    window.db = firebase.database();
+  </script>
 </head>
 <body>
 <div class="container mt-5" id="loginPage" style="max-width: 400px; display: none;">
@@ -35,6 +55,7 @@
       <button class="nav-link" onclick="showTab('catatan')">Catatan</button>
       <button class="nav-link" onclick="showTab('nilai')">Nilai</button>
       <button class="nav-link" onclick="showTab('tugas')">Tugas</button>
+      <button class="nav-link" onclick="showTab('forumchat')">Forum Chat</button>
     </nav>
     <div class="tab-section tab-active" id="dashboard">
       <h3>📋 Dashboard</h3>
@@ -123,6 +144,18 @@
         <button class="btn btn-primary" onclick="tambahBarisManualTugas()">+ Tambah Baris</button>
       </div>
     </div>
+    <!-- TAB CHAT ONLINE -->
+    <div class="tab-section" id="forumchat">
+      <h3>💬 Forum Chat Online</h3>
+      <div class="card mb-3">
+        <div class="card-body" id="chatBox" style="height:250px;overflow-y:auto"></div>
+        <div class="card-footer d-flex">
+          <input class="form-control me-2" id="chatInput" placeholder="Tulis pesan...">
+          <button class="btn btn-primary" onclick="kirimPesanChat()">Kirim</button>
+        </div>
+      </div>
+    </div>
+    <!-- END TAB CHAT ONLINE -->
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
