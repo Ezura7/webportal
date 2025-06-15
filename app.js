@@ -98,9 +98,8 @@ function loadTabel(id) {
   tbody.innerHTML = "";
   const data = JSON.parse(localStorage.getItem(id)) || [];
   data.forEach(d => tambahBaris(id, cols, d));
-  if (tbody.childElementCount === 0 || !barisKosongAda(id, cols)) {
-    tambahBarisKosong(id, cols);
-  }
+  // Selalu pastikan satu baris kosong
+  if (!barisKosongAda(id, cols)) tambahBarisKosong(id, cols);
 }
 
 function tambahBaris(id, cols, values = []) {
@@ -114,22 +113,19 @@ function tambahBaris(id, cols, values = []) {
   const hapusTd = row.insertCell();
   hapusTd.innerHTML = '<span class="hapus-btn" onclick="hapusBaris(this)">❌</span>';
 
+  // Deteksi perubahan baris terakhir
   row.addEventListener("input", function() {
-    // Selalu cek baris terakhir, dan jika terisi, tambah baris kosong baru
     const lastRow = tbody.lastElementChild;
     if (row === lastRow) {
       const tds = Array.from(row.querySelectorAll("td")).slice(0, cols);
       const terisi = tds.some(td => td.innerText.trim() !== "");
-      if (terisi) tambahBarisKosong(id, cols);
+      if (terisi && !barisKosongAda(id, cols)) tambahBarisKosong(id, cols);
     }
   });
 }
 
 function tambahBarisKosong(id, cols) {
-  // Cegah duplikasi baris kosong
-  if (!barisKosongAda(id, cols)) {
-    tambahBaris(id, cols, Array(cols).fill(""));
-  }
+  if (!barisKosongAda(id, cols)) tambahBaris(id, cols, Array(cols).fill(""));
 }
 
 function barisKosongAda(id, cols) {
@@ -151,10 +147,7 @@ function hapusBaris(el) {
   const id = tbody.parentNode.id;
   row.remove();
   const cols = document.querySelectorAll(`#${id} thead th`).length - 1;
-  // Jika setelah hapus, baris kosong tidak ada, tambahkan
-  if (!barisKosongAda(id, cols)) {
-    tambahBarisKosong(id, cols);
-  }
+  if (!barisKosongAda(id, cols)) tambahBarisKosong(id, cols);
 }
 
 function simpanCatatan() {
@@ -217,9 +210,7 @@ function loadTabelTugas() {
   const tbody = document.querySelector("#tabel-tugas tbody");
   tbody.innerHTML = "";
   data.forEach(d => tambahBarisTugas(d));
-  if (tbody.childElementCount === 0 || !barisKosongTugasAda()) {
-    tambahBarisTugas();
-  }
+  if (!barisKosongTugasAda()) tambahBarisTugas();
 }
 
 function tambahBarisTugas(data = {}) {
@@ -277,7 +268,7 @@ function cekBarisKosongTugas(row, colCount) {
         if (td.querySelector("input") && td.querySelector("input").checked) terisi = true;
       } else if (headers[i] && td.innerText.trim() !== "") terisi = true;
     });
-    if (terisi) tambahBarisTugas();
+    if (terisi && !barisKosongTugasAda()) tambahBarisTugas();
   }
 }
 
@@ -289,9 +280,7 @@ function hapusBarisTugas(el) {
   const row = el.closest("tr");
   const tbody = row.parentNode;
   row.remove();
-  if (!barisKosongTugasAda()) {
-    tambahBarisTugas();
-  }
+  if (!barisKosongTugasAda()) tambahBarisTugas();
 }
 
 // =============== LAINNYA ================
@@ -306,6 +295,7 @@ function loadEventKalender() {
 
 function initKalender() {
   const calendarEl = document.getElementById('calendar');
+  if (!calendarEl) return;
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     editable: true,
