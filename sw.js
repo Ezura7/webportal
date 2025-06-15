@@ -3,11 +3,11 @@
 const CACHE = 'app-v1';
 const ASSETS = [
   '/',
-  '/index_login_user_prefix.html',
+  '/index.html',
   '/manifest.json',
   '/styles.css',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/icons/portal-icon-192.png',
+  '/icons/portal-icon-512.png'
 ];
 
 self.addEventListener('install', function (evt) {
