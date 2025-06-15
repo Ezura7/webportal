@@ -13,7 +13,6 @@
   Storage.prototype.removeItem = function(key){ originalRemove.call(this, withPrefix(key)); };
 })();
 
-
 function showTab(id) {
   document.querySelectorAll('.tab-section').forEach(div => div.classList.remove('tab-active'));
   document.getElementById(id).classList.add('tab-active');
@@ -84,7 +83,6 @@ function loadFotoProfil() {
 function simpanTabel(id) {
   const rows = document.querySelectorAll(`#${id} tbody tr`);
   const data = [];
-  // ambil jumlah kolom header selain aksi
   const headerLen = document.querySelectorAll(`#${id} thead th`).length - 1;
   rows.forEach(row => {
     const cells = [...row.querySelectorAll("td")].slice(0, headerLen).map(td => td.innerText.trim());
@@ -162,18 +160,15 @@ function hapusCatatan(index) {
 function simpanTabelTugas() {
   const rows = document.querySelectorAll(`#tabel-tugas tbody tr`);
   const data = [];
-  // ambil jumlah kolom header selain aksi
   const headerLen = document.querySelectorAll(`#tabel-tugas thead th`).length - 1;
   rows.forEach(row => {
     const rowData = {};
     let filled = false;
     let colIndex = 0;
-    // Skip "Aksi" kolom
     row.querySelectorAll("td").forEach((td, i) => {
       if (i < headerLen) {
         let th = document.querySelectorAll(`#tabel-tugas thead th`)[i].innerText.trim();
         if (th === "Status") {
-          // Checkbox
           rowData[th] = td.querySelector("input") ? td.querySelector("input").checked : false;
         } else {
           rowData[th] = td.classList.contains("status") && td.querySelector("input") 
@@ -201,12 +196,9 @@ function loadTabelTugas() {
 function tambahBarisTugas(data = {}) {
   const tbody = document.querySelector("#tabel-tugas tbody");
   const row = tbody.insertRow();
-
-  // Ambil header, skip "Aksi"
   const headers = Array.from(document.querySelectorAll(`#tabel-tugas thead th`))
     .map(th => th.innerText.trim())
     .filter(h => h !== "Aksi");
-
   headers.forEach(header => {
     const td = row.insertCell();
     if (header === "Status") {
@@ -218,7 +210,6 @@ function tambahBarisTugas(data = {}) {
       td.innerText = data[header] || "";
     }
   });
-
   const tdAksi = row.insertCell();
   tdAksi.innerHTML = `<span class="hapus-btn" onclick="hapusBaris(this)">❌</span>`;
   row.setAttribute("oninput", `cekBarisAkhirTugas(this)`);
@@ -230,23 +221,18 @@ function cekBarisAkhirTugas(row) {
   if (row === last) tambahBarisTugas();
 }
 
-
-// Tambah Kolom Dinamis
+// Tambah Kolom Dinamis (tanpa prompt, langsung Kolom N)
 function tambahKolom(tableId) {
   const table = document.getElementById(tableId);
   if (!table) return;
   const thead = table.querySelector("thead tr");
   const ths = thead.querySelectorAll("th");
   const aksiTh = ths[ths.length - 1];
-  // Prompt nama kolom
-  let namaKolom = prompt("Masukkan nama kolom baru:");
-  if (!namaKolom) return;
-  // Insert sebelum aksi
+  const newColNum = ths.length; // Kolom ke-N (setelah aksi)
   const th = document.createElement("th");
-  th.innerText = namaKolom;
+  th.innerText = "Kolom " + newColNum;
   thead.insertBefore(th, aksiTh);
 
-  // Tambahkan td pada setiap baris di tbody sebelum aksi
   table.querySelectorAll("tbody tr").forEach(tr => {
     const tds = tr.querySelectorAll("td");
     const hapusTd = tds[tds.length - 1];
@@ -257,21 +243,18 @@ function tambahKolom(tableId) {
   });
 }
 
-// Tambah Kolom Dinamis untuk tabel tugas (ada checkbox)
+// Tambah Kolom Dinamis untuk tabel tugas (tanpa prompt)
 function tambahKolomTugas() {
   const table = document.getElementById("tabel-tugas");
   if (!table) return;
   const thead = table.querySelector("thead tr");
   const ths = thead.querySelectorAll("th");
   const aksiTh = ths[ths.length - 1];
-  let namaKolom = prompt("Masukkan nama kolom baru:");
-  if (!namaKolom) return;
-  // Insert sebelum aksi
+  const newColNum = ths.length;
   const th = document.createElement("th");
-  th.innerText = namaKolom;
+  th.innerText = "Kolom " + newColNum;
   thead.insertBefore(th, aksiTh);
 
-  // Tambahkan td pada setiap baris di tbody sebelum aksi
   table.querySelectorAll("tbody tr").forEach(tr => {
     const tds = tr.querySelectorAll("td");
     const hapusTd = tds[tds.length - 1];
@@ -316,10 +299,10 @@ function initKalender() {
       let color = '#3788d8'; // default
 
       switch (category.toLowerCase()) {
-        case 'kuliah': color = '#28a745'; break; // hijau
-        case 'ujian': color = '#dc3545'; break; // merah
-        case 'tugas': color = '#ffc107'; break; // kuning
-        case 'lainnya': color = '#6c757d'; break; // abu
+        case 'kuliah': color = '#28a745'; break;
+        case 'ujian': color = '#dc3545'; break;
+        case 'tugas': color = '#ffc107'; break;
+        case 'lainnya': color = '#6c757d'; break;
       }
 
       const event = { title, start: info.dateStr, color };
@@ -386,7 +369,6 @@ window.onload = () => {
   loadText("dashboardInput");
   loadProfil();
   loadFotoProfil();
-  // Hitung kolom dari jumlah header - 1 (kecuali aksi)
   loadTabel("tabel-matkul", document.querySelectorAll("#tabel-matkul thead th").length - 1);
   loadTabel("tabel-jadwal", document.querySelectorAll("#tabel-jadwal thead th").length - 1);
   loadTabel("tabel-nilai", document.querySelectorAll("#tabel-nilai thead th").length - 1);
