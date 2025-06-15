@@ -86,11 +86,14 @@ function simpanTabel(id) {
   const headerLen = document.querySelectorAll(`#${id} thead th`).length - 1;
   rows.forEach(row => {
     const cells = [...row.querySelectorAll("td")].slice(0, headerLen).map(td => td.innerText.trim());
+    // Jangan simpan baris kosong terakhir
     if (cells.some(c => c !== "")) data.push(cells);
   });
   localStorage.setItem(id, JSON.stringify(data));
   alert("Tabel disimpan!");
 }
+
+// --- FUNGSI UTAMA: Tambah Baris Otomatis Ketika Baris Kosong Terisi ---
 
 function loadTabel(id, cols) {
   const tbody = document.querySelector(`#${id} tbody`);
@@ -110,22 +113,41 @@ function tambahBaris(id, cols, values = []) {
   }
   const hapusTd = row.insertCell();
   hapusTd.innerHTML = '<span class="hapus-btn" onclick="hapusBaris(this)">❌</span>';
-  row.setAttribute("oninput", `cekBarisAkhir(this, '${id}', ${cols})`);
+  // Deteksi perubahan isi baris
+  row.addEventListener("input", function() {
+    cekBarisKosongOtomatis(id);
+  });
 }
 
 function tambahBarisKosong(id, cols) {
   tambahBaris(id, cols, Array(cols).fill(""));
 }
 
-function cekBarisAkhir(row, tableId, cols) {
-  const tbody = document.querySelector(`#${tableId} tbody`);
-  const last = tbody.lastElementChild;
-  if (row === last) tambahBarisKosong(tableId, cols);
+function cekBarisKosongOtomatis(id) {
+  const tbody = document.querySelector(`#${id} tbody`);
+  const lastRow = tbody.lastElementChild;
+  if (!lastRow) return;
+  // Cek jika baris terakhir sudah diisi (ada minimal satu kolom yang tidak kosong)
+  const cols = lastRow.querySelectorAll("td:not(:last-child)");
+  let isKosong = true;
+  cols.forEach(td => { if (td.innerText.trim() !== "") isKosong = false; });
+  if (!isKosong) {
+    // Tambah baris kosong baru
+    tambahBarisKosong(id, cols.length);
+  }
 }
 
 function hapusBaris(el) {
   const row = el.closest("tr");
+  const tbody = row.parentNode;
   row.remove();
+  // Pastikan selalu ada satu baris kosong di bawah
+  const id = tbody.parentNode.id;
+  const headerLen = document.querySelectorAll(`#${id} thead th`).length - 1;
+  const lastRow = tbody.lastElementChild;
+  if (!lastRow || Array.from(lastRow.querySelectorAll("td")).slice(0, headerLen).some(td => td.innerText.trim() !== "")) {
+    tambahBarisKosong(id, headerLen);
+  }
 }
 
 function simpanCatatan() {
@@ -212,27 +234,47 @@ function tambahBarisTugas(data = {}) {
   });
   const tdAksi = row.insertCell();
   tdAksi.innerHTML = `<span class="hapus-btn" onclick="hapusBaris(this)">❌</span>`;
-  row.setAttribute("oninput", `cekBarisAkhirTugas(this)`);
+  // Deteksi perubahan isi baris
+  row.addEventListener("input", function() {
+    cekBarisKosongOtomatisTugas();
+  });
 }
 
-function cekBarisAkhirTugas(row) {
+function cekBarisKosongOtomatisTugas() {
   const tbody = document.querySelector(`#tabel-tugas tbody`);
-  const last = tbody.lastElementChild;
-  if (row === last) tambahBarisTugas();
+  const lastRow = tbody.lastElementChild;
+  if (!lastRow) return;
+  // Cek jika baris terakhir sudah diisi (ada minimal satu kolom yang tidak kosong)
+  const cols = lastRow.querySelectorAll("td:not(:last-child)");
+  let isKosong = true;
+  cols.forEach(td => {
+    // Untuk kolom status (checkbox), cek juga
+    if (td.classList.contains("status")) {
+      if (td.querySelector("input") && td.querySelector("input").checked) isKosong = false;
+    } else {
+      if (td.innerText.trim() !== "") isKosong = false;
+    }
+  });
+  if (!isKosong) {
+    // Tambah baris kosong baru
+    tambahBarisTugas();
+  }
 }
 
-// Tambah Kolom Dinamis (tanpa prompt, langsung Kolom N)
+// --- FUNGSI TAMBAH KOLOM ---
+
 function tambahKolom(tableId) {
   const table = document.getElementById(tableId);
   if (!table) return;
   const thead = table.querySelector("thead tr");
   const ths = thead.querySelectorAll("th");
   const aksiTh = ths[ths.length - 1];
-  const newColNum = ths.length; // Kolom ke-N (setelah aksi)
+  const newColNum = ths.length;
   const th = document.createElement("th");
   th.innerText = "Kolom " + newColNum;
   thead.insertBefore(th, aksiTh);
 
+  // Tambahkan td pada setiap baris di tbody sebelum aksi
   table.querySelectorAll("tbody tr").forEach(tr => {
     const tds = tr.querySelectorAll("td");
     const hapusTd = tds[tds.length - 1];
@@ -241,9 +283,10 @@ function tambahKolom(tableId) {
     tdBaru.innerText = "";
     tr.insertBefore(tdBaru, hapusTd);
   });
+  // Pastikan baris kosong selalu ada dan tetap deteksi otomatis
+  cekBarisKosongOtomatis(tableId);
 }
 
-// Tambah Kolom Dinamis untuk tabel tugas (tanpa prompt)
 function tambahKolomTugas() {
   const table = document.getElementById("tabel-tugas");
   if (!table) return;
@@ -263,7 +306,10 @@ function tambahKolomTugas() {
     tdBaru.innerText = "";
     tr.insertBefore(tdBaru, hapusTd);
   });
+  cekBarisKosongOtomatisTugas();
 }
+
+// --- KALENDER & LOGIN TIDAK DIUBAH ---
 
 function simpanEventKalender(events) {
   localStorage.setItem("eventsKalender", JSON.stringify(events));
@@ -296,7 +342,7 @@ function initKalender() {
       if (!title) return;
 
       const category = prompt('Kategori? (kuliah, ujian, tugas, lainnya):', 'kuliah');
-      let color = '#3788d8'; // default
+      let color = '#3788d8';
 
       switch (category.toLowerCase()) {
         case 'kuliah': color = '#28a745'; break;
