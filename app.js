@@ -321,6 +321,99 @@ function scrollChatToBottom() {
   if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+// ============ FITUR PENDAFTARAN AKUN (DAFTAR) ==============
+
+// Modal register
+function showRegisterModal() {
+  document.getElementById("regUsername").value = "";
+  document.getElementById("regPassword").value = "";
+  document.getElementById("regNama").value = "";
+  document.getElementById("registerModal").style.display = "block";
+}
+function hideRegisterModal() {
+  document.getElementById("registerModal").style.display = "none";
+}
+
+// Daftar akun: simpan ke pendingUsers
+function registerAccount() {
+  const username = document.getElementById("regUsername").value.trim();
+  const password = document.getElementById("regPassword").value.trim();
+  const nama = document.getElementById("regNama").value.trim();
+  if (!username || !password || !nama) {
+    alert("Semua data wajib diisi!");
+    return;
+  }
+  // Cek duplikat username di pendingUsers dan users
+  window.db.ref("pendingUsers").orderByChild("username").equalTo(username).once("value", snap => {
+    if (snap.exists()) {
+      alert("Username sudah dalam proses pendaftaran!");
+    } else {
+      window.db.ref("users").orderByChild("username").equalTo(username).once("value", snap2 => {
+        if (snap2.exists() || username.toLowerCase() === "krisna") {
+          alert("Username sudah terdaftar!");
+        } else {
+          window.db.ref("pendingUsers").push({
+            username, password, nama, waktu: new Date().toISOString()
+          }, () => {
+            alert("Pendaftaran berhasil! Tunggu konfirmasi admin.");
+            hideRegisterModal();
+          });
+        }
+      });
+    }
+  });
+}
+
+// =========== PANEL ADMIN: VERIFIKASI AKUN ===========
+
+function tampilkanPendingUsers() {
+  const list = document.getElementById("pendingUsersList");
+  if (!list) return;
+  window.db.ref("pendingUsers").on("value", snap => {
+    list.innerHTML = "";
+    if (!snap.exists()) {
+      list.innerHTML = "<li class='list-group-item'>Belum ada pendaftar baru.</li>";
+      return;
+    }
+    snap.forEach(child => {
+      const data = child.val();
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex justify-content-between align-items-center";
+      li.innerHTML = `<div>
+        <b>${data.username}</b> (${data.nama})<br>
+        <small>Daftar: ${new Date(data.waktu).toLocaleString()}</small>
+      </div>
+      <div>
+        <button class="btn btn-success btn-sm me-2" onclick="approveUser('${child.key}')">Konfirmasi</button>
+        <button class="btn btn-danger btn-sm" onclick="tolakUser('${child.key}')">Tolak</button>
+      </div>`;
+      list.appendChild(li);
+    });
+  });
+}
+
+function approveUser(key) {
+  window.db.ref("pendingUsers/"+key).once("value", snap => {
+    const data = snap.val();
+    if (!data) return;
+    // Simpan ke users
+    window.db.ref("users").push({
+      username: data.username,
+      password: data.password,
+      nama: data.nama,
+      waktu: data.waktu
+    }, () => {
+      window.db.ref("pendingUsers/"+key).remove();
+      alert("User berhasil dikonfirmasi!");
+    });
+  });
+}
+function tolakUser(key) {
+  if (confirm("Tolak pendaftaran ini?")) {
+    window.db.ref("pendingUsers/"+key).remove();
+  }
+}
+
 // =============== LAINNYA ================
 
 function simpanEventKalender(events) {
@@ -408,13 +501,27 @@ function checkLogin() {
 function doLogin() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
+  // Hardcode admin & user lama
   if ((username === "Krisna" && password === "Gahansa123@") || (username === "Saleh" && password === "Saleh123")) {
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem('currentUser', username);
     location.reload();
-  } else {
-    alert("Username atau password salah!");
+    return;
   }
+  // Cek users di Firebase (hanya user yang sudah diverifikasi oleh admin yang bisa login)
+  window.db.ref("users").orderByChild("username").equalTo(username).once("value", snap => {
+    let found = false;
+    snap.forEach(child => {
+      if (child.val().password === password) found = true;
+    });
+    if (found) {
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem('currentUser', username);
+      location.reload();
+    } else {
+      alert("Username atau password salah, atau akun belum diverifikasi.");
+    }
+  });
 }
 
 function logout() {
@@ -433,7 +540,13 @@ window.onload = () => {
   loadTabel("tabel-nilai");
   loadTabelTugas();
   tampilCatatan();
-  tampilkanChatOnline(); // Tambahan: load chat online di awal
+  tampilkanChatOnline();
+  // Tambahan: tab admin jika login sebagai Krisna
+  if ((localStorage.getItem('currentUser')||"").toLowerCase() === "krisna") {
+    document.getElementById("verifTabBtn").style.display = "inline-block";
+    document.getElementById("verifakun").style.display = "block";
+    tampilkanPendingUsers();
+  }
 };
 
 function showLogin(){document.getElementById("loginPage").style.display='block';document.getElementById("mainApp").style.display='none';}
