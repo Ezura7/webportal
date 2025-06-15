@@ -44,7 +44,41 @@
     <input class="form-control" id="password" placeholder="Masukkan password" type="password"/>
   </div>
   <button class="btn btn-primary" onclick="doLogin()">Login</button>
+  <div class="mb-3 text-center">
+    <button class="btn btn-link" onclick="showRegisterModal()">Daftar Akun Baru</button>
+  </div>
 </div>
+
+<!-- Modal Daftar Akun Baru -->
+<div class="modal" tabindex="-1" id="registerModal" style="display:none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Pendaftaran Akun</h5>
+        <button type="button" class="btn-close" onclick="hideRegisterModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label>Username</label>
+          <input type="text" class="form-control" id="regUsername" autocomplete="off">
+        </div>
+        <div class="mb-2">
+          <label>Password</label>
+          <input type="password" class="form-control" id="regPassword" autocomplete="off">
+        </div>
+        <div class="mb-2">
+          <label>Nama Lengkap</label>
+          <input type="text" class="form-control" id="regNama" autocomplete="off">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideRegisterModal()">Batal</button>
+        <button class="btn btn-primary" onclick="registerAccount()">Daftar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="mainApp" style="display:none;">
   <div class="container mt-4" id="mainApp">
     <nav class="nav nav-pills mb-4">
@@ -56,6 +90,7 @@
       <button class="nav-link" onclick="showTab('nilai')">Nilai</button>
       <button class="nav-link" onclick="showTab('tugas')">Tugas</button>
       <button class="nav-link" onclick="showTab('forumchat')">Forum Chat</button>
+      <button class="nav-link" id="verifTabBtn" style="display:none;" onclick="showTab('verifakun')">Verifikasi Akun</button>
     </nav>
     <div class="tab-section tab-active" id="dashboard">
       <h3>📋 Dashboard</h3>
@@ -156,6 +191,13 @@
       </div>
     </div>
     <!-- END TAB CHAT ONLINE -->
+
+    <!-- TAB VERIFIKASI AKUN (KHUSUS ADMIN) -->
+    <div class="tab-section" id="verifakun" style="display:none;">
+      <h3>🛂 Verifikasi Pendaftaran Akun</h3>
+      <ul class="list-group" id="pendingUsersList"></ul>
+    </div>
+    <!-- END TAB VERIFIKASI AKUN -->
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
