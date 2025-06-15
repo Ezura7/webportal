@@ -86,19 +86,21 @@ function simpanTabel(id) {
   const headerLen = document.querySelectorAll(`#${id} thead th`).length - 1;
   rows.forEach(row => {
     const cells = [...row.querySelectorAll("td")].slice(0, headerLen).map(td => td.innerText.trim());
-    // Jangan simpan baris kosong terakhir
     if (cells.some(c => c !== "")) data.push(cells);
   });
   localStorage.setItem(id, JSON.stringify(data));
   alert("Tabel disimpan!");
 }
 
-function loadTabel(id, cols) {
+function loadTabel(id) {
+  const cols = document.querySelectorAll(`#${id} thead th`).length - 1;
   const tbody = document.querySelector(`#${id} tbody`);
   tbody.innerHTML = "";
   const data = JSON.parse(localStorage.getItem(id)) || [];
   data.forEach(d => tambahBaris(id, cols, d));
-  tambahBarisKosong(id, cols);
+  if (tbody.childElementCount === 0 || !barisKosongAda(id, cols)) {
+    tambahBarisKosong(id, cols);
+  }
 }
 
 function tambahBaris(id, cols, values = []) {
@@ -111,9 +113,11 @@ function tambahBaris(id, cols, values = []) {
   }
   const hapusTd = row.insertCell();
   hapusTd.innerHTML = '<span class="hapus-btn" onclick="hapusBaris(this)">❌</span>';
-  // Event listener supaya cek setiap perubahan baris terakhir
+
   row.addEventListener("input", function() {
-    if (row === tbody.lastElementChild) {
+    // Selalu cek baris terakhir, dan jika terisi, tambah baris kosong baru
+    const lastRow = tbody.lastElementChild;
+    if (row === lastRow) {
       const tds = Array.from(row.querySelectorAll("td")).slice(0, cols);
       const terisi = tds.some(td => td.innerText.trim() !== "");
       if (terisi) tambahBarisKosong(id, cols);
@@ -122,7 +126,18 @@ function tambahBaris(id, cols, values = []) {
 }
 
 function tambahBarisKosong(id, cols) {
-  tambahBaris(id, cols, Array(cols).fill(""));
+  // Cegah duplikasi baris kosong
+  if (!barisKosongAda(id, cols)) {
+    tambahBaris(id, cols, Array(cols).fill(""));
+  }
+}
+
+function barisKosongAda(id, cols) {
+  const tbody = document.querySelector(`#${id} tbody`);
+  if (!tbody.lastElementChild) return false;
+  const lastRow = tbody.lastElementChild;
+  const tds = Array.from(lastRow.querySelectorAll("td")).slice(0, cols);
+  return tds.every(td => td.innerText.trim() === "");
 }
 
 function tambahBarisManual(id) {
@@ -133,13 +148,12 @@ function tambahBarisManual(id) {
 function hapusBaris(el) {
   const row = el.closest("tr");
   const tbody = row.parentNode;
-  row.remove();
-  // Pastikan selalu ada satu baris kosong di bawah
   const id = tbody.parentNode.id;
-  const headerLen = document.querySelectorAll(`#${id} thead th`).length - 1;
-  const lastRow = tbody.lastElementChild;
-  if (!lastRow || Array.from(lastRow.querySelectorAll("td")).slice(0, headerLen).some(td => td.innerText.trim() !== "")) {
-    tambahBarisKosong(id, headerLen);
+  row.remove();
+  const cols = document.querySelectorAll(`#${id} thead th`).length - 1;
+  // Jika setelah hapus, baris kosong tidak ada, tambahkan
+  if (!barisKosongAda(id, cols)) {
+    tambahBarisKosong(id, cols);
   }
 }
 
@@ -172,6 +186,8 @@ function hapusCatatan(index) {
   tampilCatatan();
 }
 
+// ================= TABEL TUGAS ======================
+
 function simpanTabelTugas() {
   const rows = document.querySelectorAll(`#tabel-tugas tbody tr`);
   const data = [];
@@ -179,19 +195,15 @@ function simpanTabelTugas() {
   rows.forEach(row => {
     const rowData = {};
     let filled = false;
-    let colIndex = 0;
     row.querySelectorAll("td").forEach((td, i) => {
       if (i < headerLen) {
         let th = document.querySelectorAll(`#tabel-tugas thead th`)[i].innerText.trim();
         if (th === "Status") {
           rowData[th] = td.querySelector("input") ? td.querySelector("input").checked : false;
         } else {
-          rowData[th] = td.classList.contains("status") && td.querySelector("input") 
-            ? td.querySelector("input").checked
-            : td.innerText.trim();
+          rowData[th] = td.innerText.trim();
         }
         if (rowData[th] !== "" && th !== "Status") filled = true;
-        colIndex++;
       }
     });
     if (filled) data.push(rowData);
@@ -205,7 +217,9 @@ function loadTabelTugas() {
   const tbody = document.querySelector("#tabel-tugas tbody");
   tbody.innerHTML = "";
   data.forEach(d => tambahBarisTugas(d));
-  tambahBarisTugas();
+  if (tbody.childElementCount === 0 || !barisKosongTugasAda()) {
+    tambahBarisTugas();
+  }
 }
 
 function tambahBarisTugas(data = {}) {
@@ -220,40 +234,67 @@ function tambahBarisTugas(data = {}) {
       td.classList.add("status");
       td.innerHTML = `<input type="checkbox" ${data[header] ? "checked" : ""}>`;
       td.querySelector("input").addEventListener("change", function() {
-        if (row === tbody.lastElementChild) {
-          const tds = Array.from(row.querySelectorAll("td")).slice(0, headers.length);
-          const terisi = tds.some(td =>
-            td.classList.contains("status")
-              ? td.querySelector("input") && td.querySelector("input").checked
-              : td.innerText.trim() !== ""
-          );
-          if (terisi) tambahBarisTugas();
-        }
+        cekBarisKosongTugas(row, headers.length);
       });
     } else {
-      td.classList.add(header.toLowerCase().replace(/\s/g, ''));
       td.contentEditable = true;
       td.innerText = data[header] || "";
       td.addEventListener("input", function() {
-        if (row === tbody.lastElementChild) {
-          const tds = Array.from(row.querySelectorAll("td")).slice(0, headers.length);
-          const terisi = tds.some(td =>
-            td.classList.contains("status")
-              ? td.querySelector("input") && td.querySelector("input").checked
-              : td.innerText.trim() !== ""
-          );
-          if (terisi) tambahBarisTugas();
-        }
+        cekBarisKosongTugas(row, headers.length);
       });
     }
   });
   const tdAksi = row.insertCell();
-  tdAksi.innerHTML = `<span class="hapus-btn" onclick="hapusBaris(this)">❌</span>`;
+  tdAksi.innerHTML = `<span class="hapus-btn" onclick="hapusBarisTugas(this)">❌</span>`;
+}
+
+function barisKosongTugasAda() {
+  const tbody = document.querySelector("#tabel-tugas tbody");
+  if (!tbody.lastElementChild) return false;
+  const lastRow = tbody.lastElementChild;
+  const headers = Array.from(document.querySelectorAll(`#tabel-tugas thead th`))
+    .map(th => th.innerText.trim())
+    .filter(h => h !== "Aksi");
+  let kosong = true;
+  lastRow.querySelectorAll("td").forEach((td, i) => {
+    if (headers[i] === "Status") {
+      if (td.querySelector("input") && td.querySelector("input").checked) kosong = false;
+    } else if (headers[i] && td.innerText.trim() !== "") kosong = false;
+  });
+  return kosong;
+}
+
+function cekBarisKosongTugas(row, colCount) {
+  const tbody = document.querySelector("#tabel-tugas tbody");
+  const lastRow = tbody.lastElementChild;
+  if (row === lastRow) {
+    const headers = Array.from(document.querySelectorAll(`#tabel-tugas thead th`))
+      .map(th => th.innerText.trim())
+      .filter(h => h !== "Aksi");
+    let terisi = false;
+    lastRow.querySelectorAll("td").forEach((td, i) => {
+      if (headers[i] === "Status") {
+        if (td.querySelector("input") && td.querySelector("input").checked) terisi = true;
+      } else if (headers[i] && td.innerText.trim() !== "") terisi = true;
+    });
+    if (terisi) tambahBarisTugas();
+  }
 }
 
 function tambahBarisManualTugas() {
   tambahBarisTugas();
 }
+
+function hapusBarisTugas(el) {
+  const row = el.closest("tr");
+  const tbody = row.parentNode;
+  row.remove();
+  if (!barisKosongTugasAda()) {
+    tambahBarisTugas();
+  }
+}
+
+// =============== LAINNYA ================
 
 function simpanEventKalender(events) {
   localStorage.setItem("eventsKalender", JSON.stringify(events));
@@ -359,9 +400,9 @@ window.onload = () => {
   loadText("dashboardInput");
   loadProfil();
   loadFotoProfil();
-  loadTabel("tabel-matkul", document.querySelectorAll("#tabel-matkul thead th").length - 1);
-  loadTabel("tabel-jadwal", document.querySelectorAll("#tabel-jadwal thead th").length - 1);
-  loadTabel("tabel-nilai", document.querySelectorAll("#tabel-nilai thead th").length - 1);
+  loadTabel("tabel-matkul");
+  loadTabel("tabel-jadwal");
+  loadTabel("tabel-nilai");
   loadTabelTugas();
   tampilCatatan();
 };
