@@ -18,6 +18,8 @@ function showTab(id) {
   document.getElementById(id).classList.add('tab-active');
   document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
   event.target.classList.add('active');
+  // Auto scroll ke bawah jika tab chat dibuka
+  if(id==='forumchat' && typeof scrollChatToBottom === "function") scrollChatToBottom();
 }
 
 function simpanText(id) {
@@ -283,6 +285,42 @@ function hapusBarisTugas(el) {
   if (!barisKosongTugasAda()) tambahBarisTugas();
 }
 
+// =============== CHAT ONLINE FIREBASE ================
+
+function kirimPesanChat() {
+  const pesan = document.getElementById("chatInput").value.trim();
+  if (!pesan) return;
+  const user = localStorage.getItem('currentUser') || "Anonim";
+  window.db.ref("chat").push({
+    user: user,
+    pesan: pesan,
+    waktu: new Date().toISOString()
+  });
+  document.getElementById("chatInput").value = "";
+}
+
+function tampilkanChatOnline() {
+  const chatBox = document.getElementById("chatBox");
+  if (!chatBox) return;
+  window.db.ref("chat").limitToLast(50).on("value", function(snapshot) {
+    chatBox.innerHTML = "";
+    snapshot.forEach(function(child) {
+      const data = child.val();
+      chatBox.innerHTML += `
+        <div class="mb-2">
+          <b>${data.user}</b> <small class="text-muted">${new Date(data.waktu).toLocaleString()}</small><br/>
+          <span>${data.pesan}</span>
+        </div>`;
+    });
+    scrollChatToBottom();
+  });
+}
+
+function scrollChatToBottom() {
+  const chatBox = document.getElementById("chatBox");
+  if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+}
+
 // =============== LAINNYA ================
 
 function simpanEventKalender(events) {
@@ -395,6 +433,7 @@ window.onload = () => {
   loadTabel("tabel-nilai");
   loadTabelTugas();
   tampilCatatan();
+  tampilkanChatOnline(); // Tambahan: load chat online di awal
 };
 
 function showLogin(){document.getElementById("loginPage").style.display='block';document.getElementById("mainApp").style.display='none';}
