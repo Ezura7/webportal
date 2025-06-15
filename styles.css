@@ -1,8 +1,10 @@
 .tab-section { display: none; }
-    .tab-active { display: block; }
-    textarea { width: 100%; height: 150px; }
-    .hapus-btn { cursor: pointer; color: red; font-weight: bold; }
-    #fotoPreview {
-      width: 150px; height: 150px; object-fit: cover;
-      border-radius: 50%; border: 2px solid #ccc;
-    }
+.tab-active { display: block; }
+textarea { width: 100%; height: 150px; }
+.hapus-btn { cursor: pointer; color: red; font-weight: bold; }
+#fotoPreview {
+  width: 150px; height: 150px; object-fit: cover;
+  border-radius: 50%; border: 2px solid #ccc;
+}
+/* Tambahan style tombol kolom */
+.d-flex.gap-2 > .btn { min-width: 120px; }
