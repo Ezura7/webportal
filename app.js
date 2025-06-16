@@ -20,6 +20,10 @@ function showTab(id, ev) {
   document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
   if(ev && ev.target) ev.target.classList.add('active');
   if(id==='forumchat' && typeof scrollChatToBottom === "function") scrollChatToBottom();
+  // Load pendingUsers hanya jika buka tab verifakun dan user krisna
+  if(id === 'verifakun' && (localStorage.getItem('currentUser')||"").toLowerCase() === "krisna") {
+    tampilkanPendingUsers();
+  }
 }
 
 function simpanText(id) {
@@ -351,7 +355,7 @@ function registerAccount() {
               document.getElementById("regUsername").value = "";
               document.getElementById("regPassword").value = "";
               document.getElementById("regNama").value = "";
-              if (typeof afterRegisterFix === "function") afterRegisterFix(username, nama);
+              // Tidak perlu update pendingUsers di sini, cukup saat tab verifakun dibuka.
             }
           });
         }
@@ -361,16 +365,14 @@ function registerAccount() {
 }
 
 function afterRegisterFix(username, nama) {
-  if ((localStorage.getItem('currentUser')||"").toLowerCase() === "krisna" && document.getElementById("verifakun")) {
-    tampilkanPendingUsers();
-  }
+  // Tidak perlu update pendingUsers di sini
   console.log("Perbaikan: pendingUser baru atas nama " + nama + " telah didaftarkan.");
 }
 
 function tampilkanPendingUsers() {
   const list = document.getElementById("pendingUsersList");
   if (!list) return;
-  window.db.ref("pendingUsers").on("value", snap => {
+  window.db.ref("pendingUsers").once("value", snap => {
     list.innerHTML = "";
     if (!snap.exists()) {
       list.innerHTML = "<li class='list-group-item'>Belum ada pendaftar baru.</li>";
@@ -405,12 +407,15 @@ function approveUser(key) {
     }, () => {
       window.db.ref("pendingUsers/"+key).remove();
       alert("User berhasil dikonfirmasi!");
+      tampilkanPendingUsers(); // Refresh langsung pada tab verifikasi
     });
   });
 }
 function tolakUser(key) {
   if (confirm("Tolak pendaftaran ini?")) {
-    window.db.ref("pendingUsers/"+key).remove();
+    window.db.ref("pendingUsers/"+key).remove().then(() => {
+      tampilkanPendingUsers(); // Refresh langsung pada tab verifikasi
+    });
   }
 }
 
@@ -490,10 +495,10 @@ function checkLogin() {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   if (isLoggedIn === "true") {
     document.getElementById("loginPage").style.display = "none";
-    document.getElementById("mainApp").style.display = "block";
+    document.querySelector(".container").style.display = "block";
   } else {
     document.getElementById("loginPage").style.display = "block";
-    document.getElementById("mainApp").style.display = "none";
+    document.querySelector(".container").style.display = "none";
   }
 }
 
@@ -503,7 +508,7 @@ function doLogin() {
   if ((username === "Krisna" && password === "Gahansa123@") || (username === "Saleh" && password === "Saleh123")) {
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem('currentUser', username);
-    showApp();
+    location.reload();
     return;
   }
   window.db.ref("users").orderByChild("username").equalTo(username).once("value", snap => {
@@ -514,32 +519,19 @@ function doLogin() {
     if (found) {
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem('currentUser', username);
-      showApp();
+      location.reload();
     } else {
       alert("Username atau password salah, atau akun belum diverifikasi.");
     }
   });
 }
 
-// ==== PERBAIKAN LOGOUT ====
 function logout() {
   localStorage.removeItem("isLoggedIn");
-  localStorage.removeItem("currentUser");
-  showLogin();
-}
-// ==========================
-
-function showLogin(){
-  document.getElementById("loginPage").style.display='block';
-  document.getElementById("mainApp").style.display='none';
-}
-function showApp(){
-  document.getElementById("loginPage").style.display='none';
-  document.getElementById("mainApp").style.display='block';
+  location.reload();
 }
 
-// Hanya gunakan satu event handler load untuk konsistensi
-window.addEventListener('load',function(){
+window.onload = () => {
   checkLogin();
   initKalender();
   loadText("dashboardInput");
@@ -551,15 +543,18 @@ window.addEventListener('load',function(){
   loadTabelTugas();
   tampilCatatan();
   tampilkanChatOnline();
+  // Tidak auto-load pending user di sini!
   if ((localStorage.getItem('currentUser')||"").toLowerCase() === "krisna") {
     document.getElementById("verifTabBtn").style.display = "inline-block";
     document.getElementById("verifakun").style.display = "block";
-    tampilkanPendingUsers();
-  } else {
-    if(document.getElementById("verifTabBtn")) document.getElementById("verifTabBtn").style.display = "none";
-    if(document.getElementById("verifakun")) document.getElementById("verifakun").style.display = "none";
   }
-});
+};
+
+function showLogin(){document.getElementById("loginPage").style.display='block';document.getElementById("mainApp").style.display='none';}
+function showApp(){document.getElementById("loginPage").style.display='none';document.getElementById("mainApp").style.display='block';}
+window.addEventListener('load',function(){if(localStorage.getItem('isLoggedIn')==='true'){showApp();}else{showLogin();}});
+function handleLogin(){localStorage.setItem('isLoggedIn','true');showApp();}
+function handleLogout(){localStorage.removeItem('isLoggedIn');showLogin();}
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
