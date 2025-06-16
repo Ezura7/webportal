@@ -545,8 +545,7 @@ window.onload = () => {
   tampilkanChatOnline();
   // Tidak auto-load pending user di sini!
   if ((localStorage.getItem('currentUser')||"").toLowerCase() === "krisna") {
-    document.getElementById("verifTabBtn").style.display = "inline-block";
-    document.getElementById("verifakun").style.display = "block";
+    document.getElementById("verifTabBtn").style.display = "inline-block"
   }
 };
 
