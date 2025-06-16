@@ -199,3 +199,12 @@ body {
   background: #b5cde7;
   border-radius: 8px;
 }
+#notifBadge {
+  font-size: 1.1em;
+  vertical-align: middle;
+  margin-left: 2px;
+  padding: 0.1em 0.3em;
+  background: #e63946;
+  border-radius: 50%;
+  color: #fff;
+}
