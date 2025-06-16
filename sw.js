@@ -4,6 +4,7 @@ const CACHE = 'app-v1';
 const ASSETS = [
   '/',
   '/index.html',
+  '/app.js',
   '/manifest.json',
   '/styles.css',
   '/icons/portal-icon-192.png',
