@@ -1,5 +1,5 @@
 (function(){
-  // Storage prefixing for userr isolation
+  // Storage prefixing for user isolation
   const originalSet = Storage.prototype.setItem;
   const originalGet = Storage.prototype.getItem;
   const originalRemove = Storage.prototype.removeItem;
@@ -486,6 +486,7 @@ function initKalender() {
 }
 
 function checkLogin() {
+  hideRegisterModal(); // Ini WAJIB agar modal selalu tertutup saat masuk/refresh halaman!
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   if (isLoggedIn === "true") {
     document.getElementById("loginPage").style.display = "none";
@@ -493,7 +494,6 @@ function checkLogin() {
   } else {
     document.getElementById("loginPage").style.display = "block";
     document.querySelector(".container").style.display = "none";
-    hideRegisterModal();
   }
 }
 
