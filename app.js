@@ -22,24 +22,14 @@ function showTab(id, ev) {
   if(id==='forumchat' && typeof scrollChatToBottom === "function") scrollChatToBottom();
 }
 
-// ================= PATCH GABUNG JADWAL & KALENDER ===================
-// Fungsi gabung event jadwal dan kalender
+// ========== PATCH GABUNG JADWAL & KALENDER ==============
 function loadJadwalDanKalender() {
   const dataJadwal = JSON.parse(localStorage.getItem("tabel-jadwal")) || [];
   const eventsKalender = JSON.parse(localStorage.getItem("eventsKalender")) || [];
-  const hariMap = {
-    'Senin': 1, 'Selasa': 2, 'Rabu': 3, 'Kamis': 4, 'Jumat': 5, 'Sabtu': 6, 'Minggu': 0
-  };
-  // Ambil minggu berjalan (Senin-Minggu)
+  const hariMap = { 'Senin': 1, 'Selasa': 2, 'Rabu': 3, 'Kamis': 4, 'Jumat': 5, 'Sabtu': 6, 'Minggu': 0 };
   const now = new Date();
-  const mingguIni = [];
-  for (let i=0; i<7; i++) {
-    const d = new Date(now);
-    d.setDate(now.getDate() - d.getDay() + i);
-    mingguIni.push(d);
-  }
   const jadwalEvents = dataJadwal
-    .filter(row => row[0] && row[1]) // Hari & Jam
+    .filter(row => row[0] && row[1])
     .map(row => {
       const hari = row[0];
       const jam = row[1];
@@ -65,7 +55,6 @@ function simpanEventKalender(events) {
   const nonJadwalEvents = events.filter(ev => !ev.id || !ev.id.startsWith('jadwal-'));
   localStorage.setItem("eventsKalender", JSON.stringify(nonJadwalEvents));
 }
-// Patch simpan tabel jadwal agar update kalender
 function simpanTabel(id) {
   const rows = document.querySelectorAll(`#${id} tbody tr`);
   const data = [];
@@ -101,7 +90,6 @@ function loadTabel(id) {
   data.forEach(d => tambahBaris(id, cols, d));
   if (!barisKosongAda(id, cols)) tambahBarisKosong(id, cols);
 }
-// Kalender gabungan Jadwal+Kalender
 function initKalenderGabungan() {
   const calendarEl = document.getElementById('calendar');
   if (!calendarEl) return;
@@ -201,18 +189,65 @@ function hapusBaris(el) {
     }, 200);
   }
 }
-// ================= END PATCH ===================
+
+// ========== PATCH VERIFIKASI & NOTIFIKASI DASHBOARD =============
+function tampilkanPendingUsers() {
+  const list = document.getElementById("pendingUsersList");
+  if (!list) return;
+  window.db.ref("pendingUsers").on("value", snap => {
+    list.innerHTML = "";
+    if (!snap.exists()) {
+      list.innerHTML = "<li class='list-group-item'>Belum ada pendaftar baru.</li>";
+      tampilkanPendingNotifDashboard([]);
+      return;
+    }
+    const pendings = [];
+    snap.forEach(child => {
+      const data = child.val();
+      pendings.push(data);
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex justify-content-between align-items-center";
+      li.innerHTML = `<div>
+        <b>${data.username}</b> (${data.nama})<br>
+        <small>Daftar: ${data.waktu ? new Date(data.waktu).toLocaleString() : '-'}</small>
+      </div>
+      <div>
+        <button class="btn btn-success btn-sm me-2" onclick="approveUser('${child.key}')">Konfirmasi</button>
+        <button class="btn btn-danger btn-sm" onclick="tolakUser('${child.key}')">Tolak</button>
+      </div>`;
+      list.appendChild(li);
+    });
+    tampilkanPendingNotifDashboard(pendings);
+  });
+}
+function tampilkanPendingNotifDashboard(pendingList) {
+  const notifDiv = document.getElementById("pendingNotif");
+  const currentUser = (localStorage.getItem('currentUser')||"").toLowerCase();
+  if (!notifDiv) return;
+  if (currentUser !== "krisna") {
+    notifDiv.innerHTML = "";
+    return;
+  }
+  if (!pendingList || pendingList.length === 0) {
+    notifDiv.innerHTML = "";
+    return;
+  }
+  notifDiv.innerHTML = pendingList.map(
+    d=> `<div class="alert alert-warning p-2 mb-1" style="font-size:0.97em;">
+      <b>${d.username}</b> (${d.nama}) ingin meminta persetujuan kamu
+    </div>`
+  ).join('');
+}
+// ==============================================================
 
 function simpanText(id) {
   localStorage.setItem(id, document.getElementById(id).value);
   alert("Disimpan!");
 }
-
 function loadText(id) {
   const saved = localStorage.getItem(id);
   if (saved) document.getElementById(id).value = saved;
 }
-
 function simpanProfil() {
   const rows = document.querySelectorAll("#profilTable tr");
   const data = {};
@@ -224,7 +259,6 @@ function simpanProfil() {
   localStorage.setItem("profil", JSON.stringify(data));
   alert("Profil disimpan!");
 }
-
 function loadProfil() {
   const saved = JSON.parse(localStorage.getItem("profil"));
   if (saved) {
@@ -235,7 +269,6 @@ function loadProfil() {
     });
   }
 }
-
 function uploadFoto() {
   const input = document.getElementById("fotoInput");
   const file = input.files[0];
@@ -250,11 +283,9 @@ function uploadFoto() {
   };
   reader.readAsDataURL(file);
 }
-
 function editFoto() {
   document.getElementById("fotoInput").click();
 }
-
 function loadFotoProfil() {
   const savedFoto = localStorage.getItem("fotoProfil");
   if (savedFoto) {
@@ -262,9 +293,6 @@ function loadFotoProfil() {
     document.getElementById("fotoInput").classList.add("d-none");
   }
 }
-
-// Semua fungsi tabel matkul, nilai, catatan, tugas, chat, register, login, verif, dll
-// (tidak berubah dari versi aslinya)
 function tambahBaris(id, cols, values = []) {
   const tbody = document.querySelector(`#${id} tbody`);
   const row = tbody.insertRow();
@@ -284,11 +312,9 @@ function tambahBaris(id, cols, values = []) {
     }
   });
 }
-
 function tambahBarisKosong(id, cols) {
   if (!barisKosongAda(id, cols)) tambahBaris(id, cols, Array(cols).fill(""));
 }
-
 function barisKosongAda(id, cols) {
   const tbody = document.querySelector(`#${id} tbody`);
   if (!tbody.lastElementChild) return false;
@@ -296,10 +322,32 @@ function barisKosongAda(id, cols) {
   const tds = Array.from(lastRow.querySelectorAll("td")).slice(0, cols);
   return tds.every(td => td.innerText.trim() === "");
 }
-
-// ... (fungsi tugas, catatan, chat, register, login, verif, dll TIDAK berubah) ...
-// -- POTONGAN: fungsi yang tidak terkait jadwal/kalender tetap SAMA seperti file original --
-
+function simpanCatatan() {
+  const text = document.getElementById("catatanInput").value.trim();
+  if (!text) return alert("Catatan kosong");
+  const saved = JSON.parse(localStorage.getItem("catatanList")) || [];
+  saved.push(text);
+  localStorage.setItem("catatanList", JSON.stringify(saved));
+  tampilCatatan();
+  document.getElementById("catatanInput").value = "";
+}
+function tampilCatatan() {
+  const list = JSON.parse(localStorage.getItem("catatanList")) || [];
+  const ul = document.getElementById("listCatatan");
+  ul.innerHTML = "";
+  list.forEach((item, i) => {
+    const li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+    li.innerHTML = `<span>${item}</span><span class="hapus-btn" onclick="hapusCatatan(${i})">❌</span>`;
+    ul.appendChild(li);
+  });
+}
+function hapusCatatan(index) {
+  const list = JSON.parse(localStorage.getItem("catatanList")) || [];
+  list.splice(index, 1);
+  localStorage.setItem("catatanList", JSON.stringify(list));
+  tampilCatatan();
+}
 function simpanTabelTugas() {
   const rows = document.querySelectorAll(`#tabel-tugas tbody tr`);
   const data = [];
@@ -323,7 +371,6 @@ function simpanTabelTugas() {
   localStorage.setItem("tugasList", JSON.stringify(data));
   alert("Tugas disimpan!");
 }
-
 function loadTabelTugas() {
   const data = JSON.parse(localStorage.getItem("tugasList")) || [];
   const tbody = document.querySelector("#tabel-tugas tbody");
@@ -331,7 +378,6 @@ function loadTabelTugas() {
   data.forEach(d => tambahBarisTugas(d));
   if (!barisKosongTugasAda()) tambahBarisTugas();
 }
-
 function tambahBarisTugas(data = {}) {
   const tbody = document.querySelector("#tabel-tugas tbody");
   const row = tbody.insertRow();
@@ -357,7 +403,6 @@ function tambahBarisTugas(data = {}) {
   const tdAksi = row.insertCell();
   tdAksi.innerHTML = `<span class="hapus-btn" onclick="hapusBarisTugas(this)">❌</span>`;
 }
-
 function barisKosongTugasAda() {
   const tbody = document.querySelector("#tabel-tugas tbody");
   if (!tbody.lastElementChild) return false;
@@ -373,7 +418,6 @@ function barisKosongTugasAda() {
   });
   return kosong;
 }
-
 function cekBarisKosongTugas(row, colCount) {
   const tbody = document.querySelector("#tabel-tugas tbody");
   const lastRow = tbody.lastElementChild;
@@ -390,18 +434,15 @@ function cekBarisKosongTugas(row, colCount) {
     if (terisi && !barisKosongTugasAda()) tambahBarisTugas();
   }
 }
-
 function tambahBarisManualTugas() {
   tambahBarisTugas();
 }
-
 function hapusBarisTugas(el) {
   const row = el.closest("tr");
   const tbody = row.parentNode;
   row.remove();
   if (!barisKosongTugasAda()) tambahBarisTugas();
 }
-
 function kirimPesanChat() {
   const pesan = document.getElementById("chatInput").value.trim();
   if (!pesan) return;
@@ -413,7 +454,6 @@ function kirimPesanChat() {
   });
   document.getElementById("chatInput").value = "";
 }
-
 function tampilkanChatOnline() {
   const chatBox = document.getElementById("chatBox");
   if (!chatBox) return;
@@ -430,12 +470,10 @@ function tampilkanChatOnline() {
     scrollChatToBottom();
   });
 }
-
 function scrollChatToBottom() {
   const chatBox = document.getElementById("chatBox");
   if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
 }
-
 function showRegisterModal() {
   document.getElementById("regUsername").value = "";
   document.getElementById("regPassword").value = "";
@@ -445,7 +483,6 @@ function showRegisterModal() {
 function hideRegisterModal() {
   document.getElementById("registerModal").style.display = "none";
 }
-
 function registerAccount() {
   const username = document.getElementById("regUsername").value.trim();
   const password = document.getElementById("regPassword").value.trim();
@@ -481,40 +518,12 @@ function registerAccount() {
     }
   });
 }
-
 function afterRegisterFix(username, nama) {
   if ((localStorage.getItem('currentUser')||"").toLowerCase() === "krisna" && document.getElementById("verifakun")) {
     tampilkanPendingUsers();
   }
   console.log("Perbaikan: pendingUser baru atas nama " + nama + " telah didaftarkan.");
 }
-
-function tampilkanPendingUsers() {
-  const list = document.getElementById("pendingUsersList");
-  if (!list) return;
-  window.db.ref("pendingUsers").on("value", snap => {
-    list.innerHTML = "";
-    if (!snap.exists()) {
-      list.innerHTML = "<li class='list-group-item'>Belum ada pendaftar baru.</li>";
-      return;
-    }
-    snap.forEach(child => {
-      const data = child.val();
-      const li = document.createElement("li");
-      li.className = "list-group-item d-flex justify-content-between align-items-center";
-      li.innerHTML = `<div>
-        <b>${data.username}</b> (${data.nama})<br>
-        <small>Daftar: ${data.waktu ? new Date(data.waktu).toLocaleString() : '-'}</small>
-      </div>
-      <div>
-        <button class="btn btn-success btn-sm me-2" onclick="approveUser('${child.key}')">Konfirmasi</button>
-        <button class="btn btn-danger btn-sm" onclick="tolakUser('${child.key}')">Tolak</button>
-      </div>`;
-      list.appendChild(li);
-    });
-  });
-}
-
 function approveUser(key) {
   window.db.ref("pendingUsers/"+key).once("value", snap => {
     const data = snap.val();
@@ -535,8 +544,6 @@ function tolakUser(key) {
     window.db.ref("pendingUsers/"+key).remove();
   }
 }
-
-// ================= PATCH: Ganti inisialisasi onload ===================
 window.onload = () => {
   checkLogin();
   loadTabel('tabel-matkul');
@@ -548,19 +555,22 @@ window.onload = () => {
   loadText("dashboardInput");
   loadProfil();
   loadFotoProfil();
+  // Tab verifikasi khusus admin
   if ((localStorage.getItem('currentUser')||"").toLowerCase() === "krisna") {
     document.getElementById("verifTabBtn").style.display = "inline-block";
     document.getElementById("verifakun").style.display = "block";
     tampilkanPendingUsers();
+  } else {
+    document.getElementById("verifTabBtn").style.display = "none";
+    document.getElementById("verifakun").style.display = "none";
+    tampilkanPendingNotifDashboard([]);
   }
 };
-
 function showLogin(){document.getElementById("loginPage").style.display='block';document.getElementById("mainApp").style.display='none';}
 function showApp(){document.getElementById("loginPage").style.display='none';document.getElementById("mainApp").style.display='block';}
 window.addEventListener('load',function(){if(localStorage.getItem('isLoggedIn')==='true'){showApp();}else{showLogin();}});
 function handleLogin(){localStorage.setItem('isLoggedIn','true');showApp();}
 function handleLogout(){localStorage.removeItem('isLoggedIn');showLogin();}
-
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('/sw.js');
