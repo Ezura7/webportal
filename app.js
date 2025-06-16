@@ -324,6 +324,16 @@ function scrollChatToBottom() {
 
 // ============ FITUR PENDAFTARAN AKUN (DAFTAR) ==============
 
+function showRegisterModal() {
+  document.getElementById("regUsername").value = "";
+  document.getElementById("regPassword").value = "";
+  document.getElementById("regNama").value = "";
+  document.getElementById("registerModal").style.display = "flex";
+}
+function hideRegisterModal() {
+  document.getElementById("registerModal").style.display = "none";
+}
+
 function registerAccount() {
   const username = document.getElementById("regUsername").value.trim();
   const password = document.getElementById("regPassword").value.trim();
@@ -349,7 +359,9 @@ function registerAccount() {
             } else {
               alert("Pendaftaran berhasil! Tunggu konfirmasi admin.");
               hideRegisterModal();
-              // Call the fix function after successful registration
+              document.getElementById("regUsername").value = "";
+              document.getElementById("regPassword").value = "";
+              document.getElementById("regNama").value = "";
               if (typeof afterRegisterFix === "function") afterRegisterFix(username, nama);
             }
           });
