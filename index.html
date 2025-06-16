@@ -20,7 +20,6 @@
       max-width:350px; margin:auto; padding:2rem; background:#fff; border-radius:0.5rem; box-shadow:0 4px 16px #3334;
     }
     .d-none { display: none !important; }
-    /* Custom tab look */
     .nav-tabs {
       background: #fff;
       border-radius: 0.5rem 0.5rem 0 0;
@@ -74,13 +73,16 @@
         <button class="nav-link" id="matkul-tab" data-bs-toggle="tab" type="button" role="tab" aria-controls="matkul" aria-selected="false" onclick="showTab('matkul', event)">Mata Kuliah</button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="jadwalkalender-tab" data-bs-toggle="tab" type="button" role="tab" aria-controls="jadwalkalender" aria-selected="false" onclick="showTab('jadwalkalender', event)">Jadwal & Kalender</button>
+        <button class="nav-link" id="jadwal-tab" data-bs-toggle="tab" type="button" role="tab" aria-controls="jadwal" aria-selected="false" onclick="showTab('jadwal', event)">Jadwal</button>
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="nilai-tab" data-bs-toggle="tab" type="button" role="tab" aria-controls="nilai" aria-selected="false" onclick="showTab('nilai', event)">Nilai</button>
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="tugas-tab" data-bs-toggle="tab" type="button" role="tab" aria-controls="tugas" aria-selected="false" onclick="showTab('tugas', event)">Tugas</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="kalender-tab" data-bs-toggle="tab" type="button" role="tab" aria-controls="kalender" aria-selected="false" onclick="showTab('kalender', event)">Kalender</button>
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="catatan-tab" data-bs-toggle="tab" type="button" role="tab" aria-controls="catatan" aria-selected="false" onclick="showTab('catatan', event)">Catatan</button>
@@ -98,7 +100,6 @@
 
     <div id="dashboard" class="tab-section tab-active">
       <h4>Selamat Datang di Forum Chat Portal</h4>
-      <div id="pendingNotif" style="margin-bottom:10px;"></div>
       <textarea id="dashboardInput" class="form-control mb-2" rows="2" placeholder="Catatan singkat..."></textarea>
       <button class="btn btn-secondary btn-sm" onclick="simpanText('dashboardInput')">Simpan</button>
     </div>
@@ -120,17 +121,14 @@
       <button class="btn btn-secondary btn-sm" onclick="simpanTabel('tabel-matkul')">Simpan</button>
     </div>
 
-    <div id="jadwalkalender" class="tab-section">
-      <h4>Jadwal & Kalender Kegiatan</h4>
-      <div id="calendar"></div>
-      <hr/>
-      <h5 class="mt-4 mb-2">Tabel Jadwal Mingguan</h5>
-      <table id="tabel-jadwal" class="table table-striped mb-2">
+    <div id="jadwal" class="tab-section">
+      <h4>Jadwal Kuliah</h4>
+      <table id="tabel-jadwal" class="table table-striped">
         <thead><tr><th>Hari</th><th>Jam</th><th>Matkul</th><th>Kelas</th><th>Aksi</th></tr></thead>
         <tbody></tbody>
       </table>
       <button class="btn btn-success btn-sm" onclick="tambahBarisManual('tabel-jadwal')">Tambah Baris</button>
-      <button class="btn btn-secondary btn-sm" onclick="simpanTabel('tabel-jadwal')">Simpan Jadwal</button>
+      <button class="btn btn-secondary btn-sm" onclick="simpanTabel('tabel-jadwal')">Simpan</button>
     </div>
 
     <div id="nilai" class="tab-section">
@@ -151,6 +149,11 @@
       </table>
       <button class="btn btn-success btn-sm" onclick="tambahBarisManualTugas()">Tambah Baris</button>
       <button class="btn btn-secondary btn-sm" onclick="simpanTabelTugas()">Simpan</button>
+    </div>
+
+    <div id="kalender" class="tab-section">
+      <h4>Kalender Kegiatan</h4>
+      <div id="calendar"></div>
     </div>
 
     <div id="catatan" class="tab-section">
