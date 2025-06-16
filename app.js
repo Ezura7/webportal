@@ -22,7 +22,7 @@ function showTab(id, ev) {
   if(id==='forumchat' && typeof scrollChatToBottom === "function") scrollChatToBottom();
 }
 
-// ========== PATCH GABUNG JADWAL & KALENDER ==============
+// ========== JADWAL & KALENDER ==========
 function loadJadwalDanKalender() {
   const dataJadwal = JSON.parse(localStorage.getItem("tabel-jadwal")) || [];
   const eventsKalender = JSON.parse(localStorage.getItem("eventsKalender")) || [];
@@ -47,7 +47,6 @@ function loadJadwalDanKalender() {
         id: 'jadwal-'+hari+'-'+jam+'-'+matkul+'-'+kelas
       }
     });
-  const jadwalEventIds = new Set(jadwalEvents.map(ev=>ev.id));
   const nonJadwalEvents = eventsKalender.filter(ev => !ev.id || !ev.id.startsWith('jadwal-'));
   return [...jadwalEvents, ...nonJadwalEvents];
 }
@@ -190,7 +189,7 @@ function hapusBaris(el) {
   }
 }
 
-// ========== PATCH VERIFIKASI & NOTIFIKASI DASHBOARD =============
+// ========== VERIFIKASI & NOTIFIKASI DASHBOARD ==========
 function tampilkanPendingUsers() {
   const list = document.getElementById("pendingUsersList");
   if (!list) return;
@@ -238,7 +237,19 @@ function tampilkanPendingNotifDashboard(pendingList) {
     </div>`
   ).join('');
 }
-// ==============================================================
+
+// ========== LOGOUT FIX ==========
+function logout() {
+  // Hapus status login dan username
+  localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("currentUser");
+  // Optional: reload atau tampilkan login
+  showLogin();
+  // Atau pakai location.reload(); jika ingin refresh total
+  // location.reload();
+}
+
+// ========== FUNGSI LAINNYA (TIDAK DIUBAH) ==========
 
 function simpanText(id) {
   localStorage.setItem(id, document.getElementById(id).value);
@@ -544,6 +555,17 @@ function tolakUser(key) {
     window.db.ref("pendingUsers/"+key).remove();
   }
 }
+function checkLogin() {
+  hideRegisterModal();
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  if (isLoggedIn === "true") {
+    document.getElementById("loginPage").style.display = "none";
+    document.querySelector(".container").style.display = "block";
+  } else {
+    document.getElementById("loginPage").style.display = "block";
+    document.querySelector(".container").style.display = "none";
+  }
+}
 window.onload = () => {
   checkLogin();
   loadTabel('tabel-matkul');
@@ -566,11 +588,17 @@ window.onload = () => {
     tampilkanPendingNotifDashboard([]);
   }
 };
-function showLogin(){document.getElementById("loginPage").style.display='block';document.getElementById("mainApp").style.display='none';}
-function showApp(){document.getElementById("loginPage").style.display='none';document.getElementById("mainApp").style.display='block';}
-window.addEventListener('load',function(){if(localStorage.getItem('isLoggedIn')==='true'){showApp();}else{showLogin();}});
-function handleLogin(){localStorage.setItem('isLoggedIn','true');showApp();}
-function handleLogout(){localStorage.removeItem('isLoggedIn');showLogin();}
+function showLogin(){
+  document.getElementById("loginPage").style.display='block';
+  document.getElementById("mainApp").style.display='none';
+}
+function showApp(){
+  document.getElementById("loginPage").style.display='none';
+  document.getElementById("mainApp").style.display='block';
+}
+window.addEventListener('load',function(){
+  if(localStorage.getItem('isLoggedIn')==='true'){showApp();}else{showLogin();}
+});
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('/sw.js');
