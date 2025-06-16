@@ -1,5 +1,5 @@
 (function(){
-  // Storage prefixing for user isolation
+  // Storage prefixing for userr isolation
   const originalSet = Storage.prototype.setItem;
   const originalGet = Storage.prototype.getItem;
   const originalRemove = Storage.prototype.removeItem;
@@ -493,6 +493,7 @@ function checkLogin() {
   } else {
     document.getElementById("loginPage").style.display = "block";
     document.querySelector(".container").style.display = "none";
+    hideRegisterModal();
   }
 }
 
