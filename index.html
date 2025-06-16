@@ -68,6 +68,9 @@
       <div id="chatBox" class="border rounded p-2 mb-2" style="height:250px; overflow-y:auto; background:#fff;"></div>
       <textarea id="chatInput" class="form-control mb-2" rows="2" placeholder="Ketik pesan..."></textarea>
       <button class="btn btn-primary btn-sm" onclick="kirimPesanChat()">Kirim</button>
+      <button class="nav-link" id="forumchat-tab" data-bs-toggle="tab" type="button" role="tab" aria-controls="forumchat" aria-selected="false" onclick="showTab('forumchat', event)">
+      <span id="notifBadge" class="badge bg-danger ms-1 d-none">●</span>
+      </button>
     </div>
 
     <div id="matkul" class="tab-section">
