@@ -1,6 +1,6 @@
 /* --- BASED ON EXISTING STYLES --- */
 .tab-section { display: none; }
-tab-section.tab-active { display: block; }
+.tab-active { display: block; }
 textarea { width: 100%; height: 150px; }
 .hapus-btn {
   cursor: pointer;
