@@ -23,6 +23,7 @@
     #loginPage { max-width: 400px; margin: 60px auto; }
     #calendar { max-width: 600px; margin: 0 auto 2rem; }
     #pendingUsersList li { font-size: 1rem; }
+    .d-none { display: none !important; }
   </style>
 </head>
 <body>
@@ -38,16 +39,16 @@
   <!-- Main app -->
   <div id="mainApp" class="container card p-4" style="display:none;">
     <nav class="mb-3">
-      <button class="nav-link active" onclick="showTab('dashboard')">Dashboard</button>
-      <button class="nav-link" onclick="showTab('forumchat')">Forum Chat</button>
-      <button class="nav-link" onclick="showTab('matkul')">Mata Kuliah</button>
-      <button class="nav-link" onclick="showTab('jadwal')">Jadwal</button>
-      <button class="nav-link" onclick="showTab('nilai')">Nilai</button>
-      <button class="nav-link" onclick="showTab('tugas')">Tugas</button>
-      <button class="nav-link" onclick="showTab('kalender')">Kalender</button>
-      <button class="nav-link" onclick="showTab('catatan')">Catatan</button>
-      <button class="nav-link" onclick="showTab('profil')">Profil</button>
-      <button id="verifTabBtn" class="nav-link" style="display:none;" onclick="showTab('verifakun')">Verif. Akun</button>
+      <button class="nav-link active" onclick="showTab('dashboard', event)">Dashboard</button>
+      <button class="nav-link" onclick="showTab('forumchat', event)">Forum Chat</button>
+      <button class="nav-link" onclick="showTab('matkul', event)">Mata Kuliah</button>
+      <button class="nav-link" onclick="showTab('jadwal', event)">Jadwal</button>
+      <button class="nav-link" onclick="showTab('nilai', event)">Nilai</button>
+      <button class="nav-link" onclick="showTab('tugas', event)">Tugas</button>
+      <button class="nav-link" onclick="showTab('kalender', event)">Kalender</button>
+      <button class="nav-link" onclick="showTab('catatan', event)">Catatan</button>
+      <button class="nav-link" onclick="showTab('profil', event)">Profil</button>
+      <button id="verifTabBtn" class="nav-link" style="display:none;" onclick="showTab('verifakun', event)">Verif. Akun</button>
       <button class="nav-link float-end text-danger" onclick="logout()">Logout</button>
     </nav>
 
@@ -153,19 +154,16 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
   <script>
-    // Konfigurasi Firebase (ganti sesuai project)
-    var firebaseConfig = {
-      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAeC2wlPafry-qaaPF0xvjOtoT7UhYarGg",
-  authDomain: "forumchatportal.firebaseapp.com",
-  databaseURL: "https://forumchatportal-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "forumchatportal",
-  storageBucket: "forumchatportal.firebasestorage.app",
-  messagingSenderId: "827734259506",
-  appId: "1:827734259506:web:5e8a59ff4cc28f32a3892b",
-  measurementId: "G-V7SR8JG4TW"
-};
+    // Konfigurasi Firebase dari kamu
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeC2wlPafry-qaaPF0xvjOtoT7UhYarGg",
+      authDomain: "forumchatportal.firebaseapp.com",
+      databaseURL: "https://forumchatportal-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "forumchatportal",
+      storageBucket: "forumchatportal.appspot.com",
+      messagingSenderId: "827734259506",
+      appId: "1:827734259506:web:5e8a59ff4cc28f32a3892b",
+      measurementId: "G-V7SR8JG4TW"
     };
     firebase.initializeApp(firebaseConfig);
     window.db = firebase.database();
