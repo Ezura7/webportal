@@ -1,5 +1,5 @@
 .tab-section { display: none; }
-.tab-active { display: block; }
+.tab-section.tab-active { display: block; }
 textarea { width: 100%; height: 150px; }
 .hapus-btn { cursor: pointer; color: red; font-weight: bold; }
 #fotoPreview {
