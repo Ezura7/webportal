@@ -6,6 +6,7 @@
   <title>Forum Chat Portal</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
   <style>
     body { background: #f5f7fa; }
     .container { max-width: 900px; margin-top: 30px; }
@@ -215,5 +216,18 @@
     window.db = firebase.database();
   </script>
   <script src="app.js"></script>
+  <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/webportal/sw.js')
+      .then(function(reg) {
+        console.log('Service Worker registered! Scope:', reg.scope);
+      })
+      .catch(function(err) {
+        console.error('Service Worker registration failed:', err);
+      });
+  });
+}
+</script>
 </body>
 </html>
