@@ -531,6 +531,21 @@ function logout() {
   location.reload();
 }
 
+// Fitur Notifikasi Badge Real-time pada Tab Forum Chat
+
+// Deteksi pesan baru masuk
+window.db.ref("chat").limitToLast(1).on("child_added", function(snapshot) {
+  // Jika tab Forum Chat sedang tidak aktif, tampilkan badge
+  if (!document.getElementById('forumchat').classList.contains('tab-active')) {
+    document.getElementById('notifBadge').classList.remove('d-none');
+  }
+});
+
+// Saat tab Forum Chat diklik, sembunyikan badge
+document.getElementById('forumchat-tab').addEventListener('click', function() {
+  document.getElementById('notifBadge').classList.add('d-none');
+});
+
 window.onload = () => {
   checkLogin();
   initKalender();
