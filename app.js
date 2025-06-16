@@ -14,12 +14,11 @@
   Storage.prototype.removeItem = function(key){ originalRemove.call(this, withPrefix(key)); };
 })();
 
-function showTab(id) {
+function showTab(id, ev) {
   document.querySelectorAll('.tab-section').forEach(div => div.classList.remove('tab-active'));
   document.getElementById(id).classList.add('tab-active');
   document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-  if(event && event.target) event.target.classList.add('active');
-  // Auto scroll ke bawah jika tab chat dibuka
+  if(ev && ev.target) ev.target.classList.add('active');
   if(id==='forumchat' && typeof scrollChatToBottom === "function") scrollChatToBottom();
 }
 
@@ -101,7 +100,6 @@ function loadTabel(id) {
   tbody.innerHTML = "";
   const data = JSON.parse(localStorage.getItem(id)) || [];
   data.forEach(d => tambahBaris(id, cols, d));
-  // Selalu pastikan satu baris kosong
   if (!barisKosongAda(id, cols)) tambahBarisKosong(id, cols);
 }
 
@@ -115,8 +113,6 @@ function tambahBaris(id, cols, values = []) {
   }
   const hapusTd = row.insertCell();
   hapusTd.innerHTML = '<span class="hapus-btn" onclick="hapusBaris(this)">❌</span>';
-
-  // Deteksi perubahan baris terakhir
   row.addEventListener("input", function() {
     const lastRow = tbody.lastElementChild;
     if (row === lastRow) {
@@ -181,8 +177,6 @@ function hapusCatatan(index) {
   localStorage.setItem("catatanList", JSON.stringify(list));
   tampilCatatan();
 }
-
-// ================= TABEL TUGAS ======================
 
 function simpanTabelTugas() {
   const rows = document.querySelectorAll(`#tabel-tugas tbody tr`);
@@ -286,8 +280,6 @@ function hapusBarisTugas(el) {
   if (!barisKosongTugasAda()) tambahBarisTugas();
 }
 
-// =============== CHAT ONLINE FIREBASE ================
-
 function kirimPesanChat() {
   const pesan = document.getElementById("chatInput").value.trim();
   if (!pesan) return;
@@ -322,8 +314,6 @@ function scrollChatToBottom() {
   if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// ============ FITUR PENDAFTARAN AKUN (DAFTAR) ==============
-
 function showRegisterModal() {
   document.getElementById("regUsername").value = "";
   document.getElementById("regPassword").value = "";
@@ -342,7 +332,6 @@ function registerAccount() {
     alert("Semua data wajib diisi!");
     return;
   }
-  // Cek duplikat username di pendingUsers dan users
   window.db.ref("pendingUsers").orderByChild("username").equalTo(username).once("value", snap => {
     if (snap.exists()) {
       alert("Username sudah dalam proses pendaftaran!");
@@ -371,18 +360,12 @@ function registerAccount() {
   });
 }
 
-// =========== FITUR PERBAIKAN FUNCTION ===========
-// Fungsi ini akan otomatis dipanggil setelah user berhasil daftar
 function afterRegisterFix(username, nama) {
-  // Contoh: reload daftar pendingUser untuk admin (jika login sebagai Krisna)
   if ((localStorage.getItem('currentUser')||"").toLowerCase() === "krisna" && document.getElementById("verifakun")) {
     tampilkanPendingUsers();
   }
-  // Bisa tambahkan fix lain sesuai kebutuhan
   console.log("Perbaikan: pendingUser baru atas nama " + nama + " telah didaftarkan.");
 }
-
-// =========== PANEL ADMIN: VERIFIKASI AKUN ===========
 
 function tampilkanPendingUsers() {
   const list = document.getElementById("pendingUsersList");
@@ -430,8 +413,6 @@ function tolakUser(key) {
     window.db.ref("pendingUsers/"+key).remove();
   }
 }
-
-// =============== LAINNYA ================
 
 function simpanEventKalender(events) {
   localStorage.setItem("eventsKalender", JSON.stringify(events));
@@ -518,14 +499,12 @@ function checkLogin() {
 function doLogin() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
-  // Hardcode admin & user lama
   if ((username === "Krisna" && password === "Gahansa123@") || (username === "Saleh" && password === "Saleh123")) {
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem('currentUser', username);
     location.reload();
     return;
   }
-  // Cek users di Firebase (hanya user yang sudah diverifikasi oleh admin yang bisa login)
   window.db.ref("users").orderByChild("username").equalTo(username).once("value", snap => {
     let found = false;
     snap.forEach(child => {
@@ -558,7 +537,6 @@ window.onload = () => {
   loadTabelTugas();
   tampilCatatan();
   tampilkanChatOnline();
-  // Tambahan: tab admin jika login sebagai Krisna
   if ((localStorage.getItem('currentUser')||"").toLowerCase() === "krisna") {
     document.getElementById("verifTabBtn").style.display = "inline-block";
     document.getElementById("verifakun").style.display = "block";
