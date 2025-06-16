@@ -1,4 +1,5 @@
 (function(){
+  // Storage prefixing for user isolation
   const originalSet = Storage.prototype.setItem;
   const originalGet = Storage.prototype.getItem;
   const originalRemove = Storage.prototype.removeItem;
@@ -17,7 +18,7 @@ function showTab(id) {
   document.querySelectorAll('.tab-section').forEach(div => div.classList.remove('tab-active'));
   document.getElementById(id).classList.add('tab-active');
   document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
+  if(event && event.target) event.target.classList.add('active');
   // Auto scroll ke bawah jika tab chat dibuka
   if(id==='forumchat' && typeof scrollChatToBottom === "function") scrollChatToBottom();
 }
@@ -323,18 +324,6 @@ function scrollChatToBottom() {
 
 // ============ FITUR PENDAFTARAN AKUN (DAFTAR) ==============
 
-// Modal register
-function showRegisterModal() {
-  document.getElementById("regUsername").value = "";
-  document.getElementById("regPassword").value = "";
-  document.getElementById("regNama").value = "";
-  document.getElementById("registerModal").style.display = "block";
-}
-function hideRegisterModal() {
-  document.getElementById("registerModal").style.display = "none";
-}
-
-// Daftar akun: simpan ke pendingUsers
 function registerAccount() {
   const username = document.getElementById("regUsername").value.trim();
   const password = document.getElementById("regPassword").value.trim();
@@ -354,14 +343,31 @@ function registerAccount() {
         } else {
           window.db.ref("pendingUsers").push({
             username, password, nama, waktu: new Date().toISOString()
-          }, () => {
-            alert("Pendaftaran berhasil! Tunggu konfirmasi admin.");
-            hideRegisterModal();
+          }, function(err) {
+            if (err) {
+              alert("Gagal mendaftar! Cek koneksi atau rules Firebase.");
+            } else {
+              alert("Pendaftaran berhasil! Tunggu konfirmasi admin.");
+              hideRegisterModal();
+              // Call the fix function after successful registration
+              if (typeof afterRegisterFix === "function") afterRegisterFix(username, nama);
+            }
           });
         }
       });
     }
   });
+}
+
+// =========== FITUR PERBAIKAN FUNCTION ===========
+// Fungsi ini akan otomatis dipanggil setelah user berhasil daftar
+function afterRegisterFix(username, nama) {
+  // Contoh: reload daftar pendingUser untuk admin (jika login sebagai Krisna)
+  if ((localStorage.getItem('currentUser')||"").toLowerCase() === "krisna" && document.getElementById("verifakun")) {
+    tampilkanPendingUsers();
+  }
+  // Bisa tambahkan fix lain sesuai kebutuhan
+  console.log("Perbaikan: pendingUser baru atas nama " + nama + " telah didaftarkan.");
 }
 
 // =========== PANEL ADMIN: VERIFIKASI AKUN ===========
@@ -381,7 +387,7 @@ function tampilkanPendingUsers() {
       li.className = "list-group-item d-flex justify-content-between align-items-center";
       li.innerHTML = `<div>
         <b>${data.username}</b> (${data.nama})<br>
-        <small>Daftar: ${new Date(data.waktu).toLocaleString()}</small>
+        <small>Daftar: ${data.waktu ? new Date(data.waktu).toLocaleString() : '-'}</small>
       </div>
       <div>
         <button class="btn btn-success btn-sm me-2" onclick="approveUser('${child.key}')">Konfirmasi</button>
@@ -396,7 +402,6 @@ function approveUser(key) {
   window.db.ref("pendingUsers/"+key).once("value", snap => {
     const data = snap.val();
     if (!data) return;
-    // Simpan ke users
     window.db.ref("users").push({
       username: data.username,
       password: data.password,
