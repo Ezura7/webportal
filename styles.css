@@ -1,54 +1,201 @@
+/* --- BASED ON EXISTING STYLES --- */
 .tab-section { display: none; }
-.tab-section.tab-active { display: block; }
+tab-section.tab-active { display: block; }
 textarea { width: 100%; height: 150px; }
-.hapus-btn { cursor: pointer; color: red; font-weight: bold; }
-#fotoPreview {
-  width: 150px; height: 150px; object-fit: cover;
-  border-radius: 50%; border: 2px solid #ccc;
+.hapus-btn {
+  cursor: pointer;
+  color: #e63946;
+  font-weight: bold;
+  background: none;
+  border: none;
+  transition: color 0.2s;
 }
-/* Tambahan style tombol kolom */
+.hapus-btn:hover {
+  color: #b5171a;
+  text-decoration: underline;
+}
+#fotoPreview {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #7fc8f8;
+  box-shadow: 0 2px 12px #0002;
+  background: #f8fafc;
+}
 .d-flex.gap-2 > .btn { min-width: 120px; }
 
-body { background: #f5f7fa; }
-.container { max-width: 900px; margin-top: 30px; }
-#loginPage { max-width: 400px; margin: 60px auto; }
-#calendar { max-width: 600px; margin: 0 auto 2rem; }
-#pendingUsersList li { font-size: 1rem; }
+/* --- PROFESSIONAL & MODERN ENHANCEMENTS --- */
+
+/* Body & Container */
+body {
+  background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Montserrat', Arial, sans-serif;
+  color: #2d3548;
+}
+.container {
+  max-width: 900px;
+  margin-top: 40px;
+  box-shadow: 0 4px 24px #0001;
+  border-radius: 1rem;
+  background: #fff;
+}
+
+/* Login Page Card */
+#loginPage {
+  max-width: 400px;
+  margin: 60px auto;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px #0002;
+  background: #f1f6fb;
+  border: none;
+}
+#loginPage h3 {
+  font-weight: 700;
+  color: #1976d2;
+}
+#loginPage input,
+#loginPage button {
+  border-radius: 0.5rem;
+}
+
+/* Dashboard Welcome */
+#dashboard h4 {
+  color: #1976d2;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 1.2rem;
+}
+
+/* Nav Tabs Modern */
+.nav-tabs {
+  background: #fff;
+  border-radius: 1rem 1rem 0 0;
+  box-shadow: 0 2px 8px #0001;
+  padding: 0 0.25rem;
+  border-bottom: none;
+}
+.nav-tabs .nav-link {
+  color: #3a405a;
+  transition: background 0.22s, color 0.22s;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.5rem 0.5rem 0 0;
+  margin-right: 0.2rem;
+  letter-spacing: 0.02em;
+}
+.nav-tabs .nav-link.active {
+  color: #1565c0;
+  background: linear-gradient(90deg, #f0f4fa 70%, #e3f2fd 100%);
+  border-bottom: 3px solid #1976d2;
+  font-weight: 700;
+}
+.nav-tabs .nav-link:hover:not(.active) {
+  color: #0a58ca;
+  background: #f1f3f5;
+}
+
+@media (max-width: 768px) {
+  .nav-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.2rem;
+  }
+  .nav-tabs .nav-item {
+    flex: 1 0 auto;
+  }
+}
+
+/* Card look for tab-sections */
+.tab-section {
+  background: #f8fbff;
+  border-radius: 0.75rem;
+  padding: 1.5rem 1.2rem 1rem 1.2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px #0001;
+}
+#forumchat .border {
+  background: #fafdff;
+  border-radius: 0.5rem;
+}
+
+/* Table Styles */
+.table {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background: #f5f7fa;
+}
+.table th {
+  background: #e3f2fd;
+  color: #1677c5;
+  font-weight: 600;
+  border-bottom: 2px solid #b6d9fa;
+}
+.table td, .table th {
+  vertical-align: middle;
+  border-top: none;
+}
+.table .btn {
+  border-radius: 0.35rem;
+}
+
+/* Kalender & Catatan */
+#calendar {
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  background: #fafdff;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px #0001;
+  padding: 1rem;
+}
+#catatanInput, #dashboardInput {
+  background: #f0f7ff;
+}
+
+/* Register Modal */
 #registerModal {
   position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0008; z-index:2000; display:none;
   align-items:center; justify-content:center;
 }
 #registerModal .modal-content {
-  max-width:350px; margin:auto; padding:2rem; background:#fff; border-radius:0.5rem; box-shadow:0 4px 16px #3334;
+  max-width:350px; margin:auto; padding:2rem; background:#fff; border-radius:0.75rem; box-shadow:0 4px 24px #3334;
+  border: none;
 }
-.d-none { display: none !important; }
-/* Custom tab look */
-.nav-tabs {
-  background: #fff;
-  border-radius: 0.5rem 0.5rem 0 0;
-  box-shadow: 0 2px 8px #0001;
-}
-.nav-tabs .nav-link {
-  color: #495057;
-  transition: background 0.2s, color 0.2s;
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 0.25em 0.8em;
+  border-radius: 1em;
+  font-size: 0.9em;
+  color: #fff;
+  background: linear-gradient(90deg,#65b96b 60%,#389e4a 100%);
   font-weight: 500;
 }
-.nav-tabs .nav-link.active {
-  color: #0d6efd;
-  background: #f8f9fa;
-  border-bottom: 2px solid #0d6efd;
+
+/* Utility */
+.d-none { display: none !important; }
+#pendingUsersList li { font-size: 1rem; }
+
+/* Animasi sederhana */
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: translateY(0);}
 }
-.nav-tabs .nav-link:hover {
-  color: #0a58ca;
-  background: #f1f3f5;
+.tab-section, #loginPage, #registerModal .modal-content {
+  animation: fadein 0.5s;
 }
-/* Responsive tab scroll for mobile */
-@media (max-width: 768px) {
-  .nav-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-  }
-  .nav-tabs .nav-item {
-    flex: 1 0 auto;
-  }
+
+/* Scrollbar modern */
+::-webkit-scrollbar {
+  width: 8px;
+  background: #e3f2fd;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #b5cde7;
+  border-radius: 8px;
 }
