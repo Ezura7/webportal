@@ -1,9 +1,9 @@
 
 {
-  "name": "Portal Pribadi",
+  "name": "Portal Forum",
   "short_name": "Portal",
-  "start_url": ".",
-  "scope": ".",
+  "start_url": "/webportal/",
+  "scope": "/webportal/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1976d2",
