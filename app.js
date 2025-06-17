@@ -505,25 +505,22 @@ function checkLogin() {
 function doLogin() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
-  if ((username === "Krisna" && password === "Gahansa123@") || (username === "Saleh" && password === "Saleh123")) {
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem('currentUser', username);
-    location.reload();
-    return;
-  }
-  window.db.ref("users").orderByChild("username").equalTo(username).once("value", snap => {
-    let found = false;
-    snap.forEach(child => {
-      if (child.val().password === password) found = true;
-    });
-    if (found) {
+  fetch('login.php', {
+    method: 'POST',
+    body: new URLSearchParams({ username, password }),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem('currentUser', username);
       location.reload();
     } else {
-      alert("Username atau password salah, atau akun belum diverifikasi.");
+      alert(data.message);
     }
-  });
+  })
+  .catch(() => alert('Gagal terhubung ke server!'));
 }
 
 function logout() {
